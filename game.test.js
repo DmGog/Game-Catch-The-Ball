@@ -36,13 +36,13 @@ describe("Game", () => {
     })
 
     it("should return Pending status as inital", async () => {
-        let status  = await game.getStatus()
+        let status = await game.getStatus()
         expect(status).toBe("PENDING")
     })
 
     it("should return In-progress status after start()", async () => {
         await game.start()
-        let status  = await game.getStatus()
+        let status = await game.getStatus()
         expect(status).toBe("IN-PROGRESS")
     })
 
@@ -54,8 +54,8 @@ describe("Game", () => {
             }
         })
         await game.start()
-        let googlePosition  = await game.getGooglePosition()
-        let googlePosition2  = await game.getGooglePosition()
+        let googlePosition = await game.getGooglePosition()
+        let googlePosition2 = await game.getGooglePosition()
 
         expect(googlePosition).toBeEqualPosition(googlePosition2)
 
@@ -67,22 +67,94 @@ describe("Game", () => {
     })
 
     it("google should have random correct positions after jump interval", async () => {
-        for (let i=0;i<10;i++) {
+        for (let i = 0; i < 10; i++) {
             createGame()
             await game.setSettings({
                 gridSize: {
-                    rowsCount: 1,
-                    columnsCount: 2 // x
+                    rowsCount: 3,
+                    columnsCount: 3// x
                 },
                 jumpInterval: 10 // 3 seconds
             })
             await game.start()
-            let googlePosition  = await game.getGooglePosition()
+            let googlePosition = await game.getGooglePosition()
             await delay(10)
-            let googlePosition2  = await game.getGooglePosition()
+            let googlePosition2 = await game.getGooglePosition()
             expect(googlePosition).not.toBeEqualPosition(googlePosition2)
         }
     })
+
+
+    //-------------------------------------Player-----------------
+    it("should create player positions that are not equal", async () => {
+        await game.setSettings({
+            gridSize: {
+                rowsCount: 3,
+                columnsCount: 4 // x
+            }
+        });
+        await game.start();
+
+        let player1Position = await game.getPlayer1Position();
+        let player2Position = await game.getPlayer2Position();
+
+        // позиции игроков не равны
+        expect(player1Position).not.toBeEqualPosition(player2Position);
+
+        // позиции находятся в допустимых пределах
+        expect(player1Position.x).toBeGreaterThanOrEqual(0);
+        expect(player1Position.x).toBeLessThanOrEqual(3);
+        expect(player1Position.y).toBeGreaterThanOrEqual(0);
+        expect(player1Position.y).toBeLessThanOrEqual(2);
+
+        expect(player2Position.x).toBeGreaterThanOrEqual(0);
+        expect(player2Position.x).toBeLessThanOrEqual(3);
+        expect(player2Position.y).toBeGreaterThanOrEqual(0);
+        expect(player2Position.y).toBeLessThanOrEqual(2);
+    });
+
+
+    it("should ensure that Google and player positions are not equal after start", async () => {
+        await game.setSettings({
+            gridSize: {
+                rowsCount: 3,
+                columnsCount: 4 // x
+            }
+        });
+        await game.start();
+
+        let googlePosition = await game.getGooglePosition();
+        let player1Position = await game.getPlayer1Position();
+        let player2Position = await game.getPlayer2Position();
+
+        // Проверка, что позиции не равны
+        expect(googlePosition).not.toBeEqualPosition(player1Position);
+        expect(googlePosition).not.toBeEqualPosition(player2Position);
+        expect(player1Position).not.toBeEqualPosition(player2Position);
+    });
+
+    //---------------Google
+
+    it("should stop the game and set status to LOSE when Google reaches pointsToLose", async () => {
+        await game.setSettings({
+            gridSize: {
+                rowsCount: 3,
+                columnsCount: 4
+            },
+            gameEnd: {
+                pointsToWin: 10,
+                pointsToLose: 5
+            },
+            jumpInterval: 10
+        });
+        await game.start();
+
+        await delay(60);
+
+        let status = await game.getStatus();
+        expect(status).toBe("LOSE");
+    });
+
 })
 
 
