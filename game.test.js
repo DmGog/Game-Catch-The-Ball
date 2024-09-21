@@ -1,4 +1,4 @@
-import {Game} from "./game.js";
+import {Game, GAME_STATUSES} from "./game.js";
 import {NumberUtility} from "./number-utility.js";
 
 
@@ -37,13 +37,13 @@ describe("Game", () => {
 
     it("should return Pending status as inital", async () => {
         let status = await game.getStatus()
-        expect(status).toBe("PENDING")
+        expect(status).toBe(GAME_STATUSES.PENDING)
     })
 
     it("should return In-progress status after start()", async () => {
         await game.start()
         let status = await game.getStatus()
-        expect(status).toBe("IN-PROGRESS")
+        expect(status).toBe(GAME_STATUSES.IN_PROGRESS)
     })
 
     it("google should have random correct positions after start", async () => {
@@ -51,6 +51,10 @@ describe("Game", () => {
             gridSize: {
                 rowsCount: 3,
                 columnsCount: 4 // x
+            },
+            gameEnd: {
+                pointsToWin: 10,
+                pointsToLose: 5
             }
         })
         await game.start()
@@ -74,11 +78,15 @@ describe("Game", () => {
                     rowsCount: 3,
                     columnsCount: 3// x
                 },
-                jumpInterval: 10 // 3 seconds
+                gameEnd: {
+                    pointsToWin: 10,
+                    pointsToLose: 5
+                },
+                jumpInterval: 100 // 3 seconds
             })
             await game.start()
             let googlePosition = await game.getGooglePosition()
-            await delay(10)
+            await delay(150)
             let googlePosition2 = await game.getGooglePosition()
             expect(googlePosition).not.toBeEqualPosition(googlePosition2)
         }
@@ -91,7 +99,11 @@ describe("Game", () => {
             gridSize: {
                 rowsCount: 3,
                 columnsCount: 4 // x
-            }
+            },gameEnd: {
+                pointsToWin: 10,
+                pointsToLose: 5
+            },
+
         });
         await game.start();
 
@@ -119,6 +131,10 @@ describe("Game", () => {
             gridSize: {
                 rowsCount: 3,
                 columnsCount: 4 // x
+            },
+            gameEnd: {
+                pointsToWin: 10,
+                pointsToLose: 5
             }
         });
         await game.start();
@@ -143,16 +159,16 @@ describe("Game", () => {
             },
             gameEnd: {
                 pointsToWin: 10,
-                pointsToLose: 5
+                pointsToLose: 2
             },
             jumpInterval: 10
         });
         await game.start();
 
-        await delay(60);
+        await delay(2000);
 
         let status = await game.getStatus();
-        expect(status).toBe("LOSE");
+        expect(status).toBe(GAME_STATUSES.LOSE);
     });
 
 })

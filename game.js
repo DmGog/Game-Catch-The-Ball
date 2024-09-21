@@ -1,6 +1,6 @@
 import {Position} from "./position.js";
 
-const GAME_STATUSES = {
+export const GAME_STATUSES = {
     PENDING: "PENDING",
     IN_PROGRESS: "IN-PROGRESS",
     WIN: "WIN",
@@ -14,7 +14,7 @@ export class Game {
             rowsCount: 3,
             columnsCount: 3
         },
-        jumpInterval: 1000, // milliseconds,
+        jumpInterval: 100, // milliseconds,
         gameEnd: {
             pointsToWin: 10,
             pointsToLose: 5
@@ -44,6 +44,7 @@ export class Game {
         this.#settings = settings
     }
 
+
     async #jumpGoogle() {
         // create new position
         const newPosition = new Position(
@@ -63,14 +64,12 @@ export class Game {
 
         this.#googlePosition = newPosition
 
-        this.#googleScore ++
+        this.#googleScore++
 
         if (this.#googleScore === this.#settings.gameEnd.pointsToLose) {
             this.#status = GAME_STATUSES.LOSE;
-            clearInterval(this.#jumpIntervalId);
+            clearInterval(this.#jumpIntervalId)
         }
-
-
     }
 
     async #runGoogleJumpInterval() {
@@ -94,15 +93,21 @@ export class Game {
                 .getRandomNumber(0, this.#settings.gridSize.rowsCount - 1))
 
 
-        // Проверка несовпадения позиция Player1 и Player2
+        // Проверка  позиций Player1 и Player2
         if (this.#player2Position.isEqual(this.#player1Position)) {
             return this.#player2Position = new Position(
                 await this.#numberUtility.getRandomNumber(0, this.#settings.gridSize.columnsCount - 1),
                 await this.#numberUtility.getRandomNumber(0, this.#settings.gridSize.rowsCount - 1)
             );
         }
+
         await this.#jumpGoogle();
         await this.#runGoogleJumpInterval();
+    }
+
+
+    async stopGame() {
+        clearInterval(this.#jumpIntervalId)
     }
 
 
